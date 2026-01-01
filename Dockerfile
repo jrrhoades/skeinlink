@@ -1,6 +1,6 @@
 FROM ruby:3.3-slim-bookworm
 
-# Install system dependencies
+# System deps
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
       build-essential \
@@ -15,18 +15,22 @@ RUN apt-get update -qq && \
 
 WORKDIR /srv/skeinlink
 
-# Install gems first (for layer caching)
+# Copy Gemfiles for caching
 COPY Gemfile Gemfile.lock ./
+
+# Install gems
 RUN gem update --system && \
     bundle install -j4 --retry 3
 
-# Copy the full application
+# Copy full app code
 COPY . .
 
-# Precompile assets for production
+# Production setup
 ENV RAILS_ENV=production
-ENV RAILS_SERVE_STATIC_FILES=true  # Optional: Serve static files via Puma
+ENV RAILS_SERVE_STATIC_FILES=true  # Let Puma serve precompiled assets
+
+# Precompile assets
 RUN bundle exec rails assets:precompile
 
-# Start the server properly
+# Proper server start (uses project's bin/rails)
 CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
