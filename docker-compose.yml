@@ -1,20 +1,25 @@
-version: '2.4'
-volumes:
-  sql_persistent:
+version: '3.8'  # Newer version for Swarm compatibility
+
 services:
   db:
-    image: mysql:5
+    image: mariadb:10  # Upgrade from mysql:5 (EOL); MariaDB is compatible
     volumes:
       - sql_persistent:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=skeinlink_production  # Optional: Auto-create DB
+
   web:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - .:/srv/skeinlink
     ports:
       - 3000:3000
     environment:
       - RAILS_ENV=production
+      - DATABASE_HOST=db  # Link to DB service
+    depends_on:
+      - db
+
+volumes:
+  sql_persistent:
