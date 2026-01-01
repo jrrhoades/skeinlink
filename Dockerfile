@@ -15,19 +15,18 @@ RUN apt-get update -qq && \
 
 WORKDIR /srv/skeinlink
 
-# Copy Gemfiles first for caching
+# Install gems first (for layer caching)
 COPY Gemfile Gemfile.lock ./
-
-# Install gems
 RUN gem update --system && \
     bundle install -j4 --retry 3
 
-# Copy full app
+# Copy the full application
 COPY . .
 
-# Precompile assets (for production)
+# Precompile assets for production
 ENV RAILS_ENV=production
+ENV RAILS_SERVE_STATIC_FILES=true  # Optional: Serve static files via Puma
 RUN bundle exec rails assets:precompile
 
-# Run server using project's binstub
-CMD ["bin/rails", "server", "-b", "0.0.0.0"]
+# Start the server properly
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
