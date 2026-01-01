@@ -1,4 +1,4 @@
-FROM ruby:3.1.2-slim-buster
+FROM ruby:3.1.2-slim-bookworm
 
 ENV BINDING 0.0.0.0
 
