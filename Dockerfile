@@ -32,4 +32,4 @@ ENV RAILS_SERVE_STATIC_FILES=true
 RUN bundle exec rails assets:precompile || echo "Asset precompile failed (non-fatal in container)"
 
 # Proper CMD
-CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "3000"]
+CMD ["bundle", "exec", "bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
