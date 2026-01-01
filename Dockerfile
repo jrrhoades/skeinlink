@@ -1,6 +1,6 @@
 FROM ruby:3.3-slim
 
-ENV BINDING 0.0.0.0
+ENV BINDING=0.0.0.0
 
 RUN apt-get update -qq && \
     apt-get install -y --no-install-recommends \
@@ -11,13 +11,21 @@ RUN apt-get update -qq && \
       libmariadb-dev \
       libsqlite3-dev \
       vim \
-      mariadb-client
+      mariadb-client && \
+    rm -rf /var/lib/apt/lists/*
 
-VOLUME /srv/skeinlink
 WORKDIR /srv/skeinlink
 
-ADD Gemfile* /srv/skeinlink/
-RUN gem update --system
-RUN bundle install -j4 --retry 3
+# Copy Gemfiles first for caching
+COPY Gemfile Gemfile.lock ./
+
+RUN gem update --system && \
+    bundle install -j4 --retry 3
+
+# Copy the full app code
+COPY . .
+
+# Precompile assets for production (assumes RAILS_ENV=production)
+RUN bundle exec rails assets:precompile
 
 CMD ["bundle", "exec", "rails", "server"]
